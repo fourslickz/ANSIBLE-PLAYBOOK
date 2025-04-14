@@ -1,0 +1,22 @@
+- name: Install Networking Tools on Ubuntu 22.04
+  hosts: ksm_monitoring
+  become: true
+
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install network tools
+      apt:
+        name:
+          - net-tools
+          - iputils-ping
+          - traceroute
+          - dnsutils
+          - telnet
+          - nmap
+          - tcpdump
+          - mtr
+          - whois
+        state: present

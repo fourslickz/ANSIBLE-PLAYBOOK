@@ -1,0 +1,40 @@
+---
+- name: Install MySQL 8 on Ubuntu 22.04
+  hosts: ksm_monitoring
+  become: yes
+  tasks:
+    - name: Update APT Cache
+      apt:
+        update_cache: yes
+
+    - name: Install Dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+        state: present
+
+    - name: Install MySQL Server
+      apt:
+        name: mysql-server-8.0
+        state: present
+
+    - name: Enable and Start MySQL Service
+      service:
+        name: mysql
+        enabled: yes
+        state: started
+
+#    - name: Secure MySQL Installation
+#      expect:
+#        command: mysql_secure_installation
+#        responses:
+#          "Enter current password for root:": ""
+#          "Set root password?": "Y"
+#          "New password:": "your_secure_password"
+#          "Re-enter new password:": "your_secure_password"
+#          "Remove anonymous users?": "Y"
+#          "Disallow root login remotely?": "Y"
+#          "Remove test database and access to it?": "Y"
+#          "Reload privilege tables now?": "Y"

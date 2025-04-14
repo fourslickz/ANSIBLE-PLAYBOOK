@@ -1,0 +1,69 @@
+- name: Install Docker on Ubuntu 22.04
+  hosts: ksm_monitoring
+  become: true  # Jalankan sebagai root
+  tasks:
+
+    - name: Update and install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable"
+        state: present
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Docker and Docker CLI
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Ensure Docker service is enabled and started
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Add user to Docker group
+      user:
+        name: "{{ ansible_user | default('ubuntu') }}"  # Gantilah dengan user yang sesuai jika perlu
+        groups: docker
+        append: yes
+
+    - name: Add current user to Docker group
+      user:
+        name: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
+        groups: docker
+        append: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
+        dest: "/usr/local/bin/docker-compose"
+        mode: 'u+x,g+x'
+
+    - name: Verify Docker installation
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Show Docker version
+      debug:
+        msg: "Installed Docker version: {{ docker_version.stdout }}"

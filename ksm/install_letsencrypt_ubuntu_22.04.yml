@@ -1,0 +1,15 @@
+- name: Install Let's Encrypt (Certbot) and configure SSL renewal
+  hosts: ksm_monitoring
+  become: true
+  vars:
+    domain_name: "kartikasari.co.id"  # Ganti dengan domain Anda
+    email: "admin@kartikasari.co.id"  # Ganti dengan email Anda
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - certbot
+          - python3-certbot-nginx
+        state: present
+        update_cache: yes
