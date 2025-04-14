@@ -1,0 +1,19 @@
+---
+- name: Install Certbot for Let's Encrypt
+  hosts: web
+  become: yes
+  tasks:
+
+    - name: Install certbot and nginx plugin
+      apt:
+        name:
+          - certbot
+          - python3-certbot-nginx
+        state: present
+        update_cache: yes
+
+    - name: Enable and start certbot.timer for auto-renewal
+      systemd:
+        name: certbot.timer
+        enabled: yes
+        state: started

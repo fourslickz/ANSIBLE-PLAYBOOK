@@ -1,0 +1,19 @@
+---
+- name: Install PostgreSQL on Ubuntu 22.04
+  hosts: web
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install PostgreSQL
+      apt:
+        name: postgresql
+        state: present
+
+    - name: Ensure PostgreSQL is running and enabled
+      systemd:
+        name: postgresql
+        enabled: yes
+        state: started
