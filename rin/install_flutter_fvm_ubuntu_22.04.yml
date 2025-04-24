@@ -1,0 +1,88 @@
+---
+- name: Install Flutter and FVM
+  hosts: all
+  become: yes
+  vars:
+    flutter_version: "3.19.0-stable"
+    fvm_flutter_version: "3.7.23"
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - clang
+          - cmake
+          - ninja-build
+          - pkg-config
+          - libgtk-3-dev
+        state: present
+        update_cache: yes
+
+    - name: Download Flutter SDK
+      become: no
+      get_url:
+        url: "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_{{ flutter_version }}.tar.xz"
+        dest: "~/flutter_linux_{{ flutter_version }}.tar.xz"
+
+    - name: Extract Flutter SDK
+      become: no
+      unarchive:
+        src: "~/flutter_linux_{{ flutter_version }}.tar.xz"
+        dest: "~"
+        remote_src: yes
+
+    - name: Add Flutter to PATH
+      become: no
+      lineinfile:
+        path: ~/.bashrc
+        line: 'export PATH="$PATH:$HOME/flutter/bin"'
+        insertafter: EOF
+
+    - name: Source bashrc (for current session only, will not affect remote session)
+      become: no
+      shell: source ~/.bashrc
+      args:
+        executable: /bin/bash
+
+    - name: Run flutter doctor
+      become: no
+      shell: flutter doctor
+      args:
+        executable: /bin/bash
+
+    - name: Activate FVM
+      become: no
+      shell: flutter pub global activate fvm
+      args:
+        executable: /bin/bash
+
+    - name: Add pub global bin to PATH
+      become: no
+      lineinfile:
+        path: ~/.bashrc
+        line: 'export PATH="$PATH:$HOME/.pub-cache/bin"'
+        insertafter: EOF
+
+    - name: Source bashrc again
+      become: no
+      shell: source ~/.bashrc
+      args:
+        executable: /bin/bash
+
+    - name: Verify FVM version
+      become: no
+      shell: fvm --version
+      args:
+        executable: /bin/bash
+
+    - name: List installed Flutter versions via FVM
+      become: no
+      shell: fvm list
+      args:
+        executable: /bin/bash
+
+    - name: Install specific Flutter version with FVM
+      become: no
+      shell: fvm install {{ fvm_flutter_version }}
+      args:
+        executable: /bin/bash
